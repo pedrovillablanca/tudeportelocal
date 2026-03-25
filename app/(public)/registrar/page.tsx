@@ -221,6 +221,9 @@ export default function RegisterPage() {
     try {
       const supabase = createClient()
 
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Session:', session ? 'active' : 'none')
+
       const slug = formData.name
         .toLowerCase()
         .normalize('NFD')

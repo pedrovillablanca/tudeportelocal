@@ -183,7 +183,7 @@ export default async function HomePage({
               <p className="text-5xl md:text-6xl font-extrabold text-white leading-none animate-pulse">
                 {totalClubsCount || 0}
               </p>
-              <p className="text-sm md:text-base text-white/80 font-medium mt-1">
+              <p className="text-sm md:text-base text-white/80 font-extrabold mt-1">
                 Organizaciones Deportivas registradas<br className="hidden md:block" /> 
               </p>
             </div>

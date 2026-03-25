@@ -53,7 +53,7 @@ CREATE POLICY "clubs_select_active" ON clubs
 
 CREATE POLICY "clubs_insert" ON clubs
   FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (true);
 
 CREATE POLICY "clubs_update" ON clubs
   FOR UPDATE
@@ -72,7 +72,7 @@ CREATE POLICY "club_sports_select" ON club_sports
 
 CREATE POLICY "club_sports_insert" ON club_sports
   FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (true);
 
 CREATE POLICY "club_sports_update" ON club_sports
   FOR UPDATE
@@ -93,7 +93,7 @@ CREATE POLICY "update_requests_select" ON update_requests
 
 CREATE POLICY "update_requests_insert" ON update_requests
   FOR INSERT
-  WITH CHECK (auth.role() = 'authenticated');
+  WITH CHECK (true);
 
 CREATE POLICY "update_requests_update" ON update_requests
   FOR UPDATE

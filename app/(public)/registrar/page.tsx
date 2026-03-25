@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import Link from 'next/link'
 import { validateAndNormalizeSocialUrl } from '@/lib/utils/string-utils'
-import { createClient } from '@/lib/supabase/client'
 
 interface Sport {
   id: number
@@ -95,15 +94,24 @@ export default function RegisterPage() {
 
   useEffect(() => {
     async function loadData() {
-      const supabase = createClient()
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       
+      const headers = {
+        'apikey': anonKey,
+        'Authorization': `Bearer ${anonKey}`
+      }
+
       const [regionsRes, sportsRes] = await Promise.all([
-        supabase.from('regions').select('*').order('name'),
-        supabase.from('sports').select('*').eq('is_active', true).order('name')
+        fetch(`${baseUrl}/rest/v1/regions?select=*&order=name`, { headers }),
+        fetch(`${baseUrl}/rest/v1/sports?is_active=eq.true&select=*&order=name`, { headers })
       ])
       
-      if (regionsRes.data) setRegions(regionsRes.data)
-      if (sportsRes.data) setSports(sportsRes.data)
+      const regionsData = await regionsRes.json()
+      const sportsData = await sportsRes.json()
+      
+      if (regionsData) setRegions(regionsData)
+      if (sportsData) setSports(sportsData)
     }
     loadData()
   }, [])
@@ -115,12 +123,19 @@ export default function RegisterPage() {
         return
       }
       
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('communes')
-        .select('*')
-        .eq('region_id', parseInt(formData.region_id))
-        .order('name')
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      
+      const headers = {
+        'apikey': anonKey,
+        'Authorization': `Bearer ${anonKey}`
+      }
+
+      const res = await fetch(
+        `${baseUrl}/rest/v1/communes?region_id=eq.${formData.region_id}&select=*&order=name`, 
+        { headers }
+      )
+      const data = await res.json()
       
       if (data) setCommunes(data)
     }
@@ -219,10 +234,15 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const supabase = createClient()
+      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('Session:', session ? 'active' : 'none')
+      const headers = {
+        'apikey': anonKey,
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      }
 
       const slug = formData.name
         .toLowerCase()
@@ -239,9 +259,10 @@ export default function RegisterPage() {
         ? validateAndNormalizeSocialUrl(formData.facebook_url, 'facebook').normalized 
         : null
 
-      const { data: clubData, error: clubError } = await supabase
-        .from('clubs')
-        .insert({
+      const clubRes = await fetch(`${baseUrl}/rest/v1/clubs`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
           name: formData.name,
           slug,
           description: formData.description,
@@ -254,19 +275,30 @@ export default function RegisterPage() {
           is_featured: false,
           is_deleted: false
         })
-        .select()
-        .single()
+      })
 
-      if (clubError) {
-        console.error('Club creation error:', clubError)
+      if (!clubRes.ok) {
+        const errorText = await clubRes.text()
+        console.error('Club creation error:', errorText)
         throw new Error('Error al crear club')
       }
 
+      const clubData = await clubRes.json()
+      const clubId = clubData[0]?.id
+
+      if (!clubId) {
+        throw new Error('No se pudo obtener el ID del club')
+      }
+
       for (const sportId of formData.sports) {
-        await supabase.from('club_sports').insert({
-          club_id: clubData.id,
-          sport_id: sportId,
-          is_primary: sportId === formData.primary_sport
+        await fetch(`${baseUrl}/rest/v1/club_sports`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            club_id: clubId,
+            sport_id: sportId,
+            is_primary: sportId === formData.primary_sport
+          })
         })
       }
 

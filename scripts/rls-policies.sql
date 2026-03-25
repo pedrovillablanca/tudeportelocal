@@ -44,16 +44,21 @@ CREATE POLICY "sports_all" ON sports
   WITH CHECK (auth.jwt() IS NOT NULL);
 
 -- ============================================
--- Clubs: Public read active clubs, authenticated can create
+-- Clubs: Public read active clubs, anyone can create
 -- ============================================
+DROP POLICY IF EXISTS "clubs_select_active" ON clubs;
 CREATE POLICY "clubs_select_active" ON clubs
   FOR SELECT USING (
     status = 'active' AND is_deleted = false
   );
 
+DROP POLICY IF EXISTS "clubs_insert" ON clubs;
 CREATE POLICY "clubs_insert" ON clubs
   FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (
+    auth.role() IN ('anon', 'authenticated', 'service_role')
+    OR auth.role() IS NULL
+  );
 
 CREATE POLICY "clubs_update" ON clubs
   FOR UPDATE
@@ -70,9 +75,13 @@ CREATE POLICY "clubs_delete" ON clubs
 CREATE POLICY "club_sports_select" ON club_sports
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "club_sports_insert" ON club_sports;
 CREATE POLICY "club_sports_insert" ON club_sports
   FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (
+    auth.role() IN ('anon', 'authenticated', 'service_role')
+    OR auth.role() IS NULL
+  );
 
 CREATE POLICY "club_sports_update" ON club_sports
   FOR UPDATE
@@ -91,9 +100,13 @@ CREATE POLICY "update_requests_select" ON update_requests
     auth.role() = 'authenticated'
   );
 
+DROP POLICY IF EXISTS "update_requests_insert" ON update_requests;
 CREATE POLICY "update_requests_insert" ON update_requests
   FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (
+    auth.role() IN ('anon', 'authenticated', 'service_role')
+    OR auth.role() IS NULL
+  );
 
 CREATE POLICY "update_requests_update" ON update_requests
   FOR UPDATE

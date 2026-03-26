@@ -121,8 +121,7 @@ export default async function HomePage({
       .eq('is_deleted', false)
 
     if (params.q) {
-      const normalizedQuery = removeAccents(params.q)
-      query = query.or(`unaccent(name).ilike.*${normalizedQuery}*,name.ilike.*${params.q}*`)
+      query = query.ilike('name', `%${params.q}%`)
     }
 
     if (regionId) {

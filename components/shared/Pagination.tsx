@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 interface PaginationProps {
   currentPage: number
   totalPages: number
@@ -8,11 +10,11 @@ export function Pagination({ currentPage, totalPages, baseUrl }: PaginationProps
   if (totalPages <= 1) return null
 
   const getPageUrl = (page: number) => {
-    const url = new URL(baseUrl, 'http://localhost')
+    const params = new URLSearchParams()
     if (page > 1) {
-      url.searchParams.set('page', page.toString())
+      params.set('page', page.toString())
     }
-    return url.searchParams.toString() ? `?${url.searchParams.toString()}` : ''
+    return params.toString() ? `?${params.toString()}` : '/'
   }
 
   const pages: (number | string)[] = []
@@ -35,17 +37,17 @@ export function Pagination({ currentPage, totalPages, baseUrl }: PaginationProps
   return (
     <div className="flex items-center justify-center gap-2 mt-8">
       {currentPage > 1 && (
-        <a
+        <Link
           href={getPageUrl(currentPage - 1)}
           className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
         >
           ← Anterior
-        </a>
+        </Link>
       )}
 
       {pages.map((page, idx) => (
         typeof page === 'number' ? (
-          <a
+          <Link
             key={idx}
             href={getPageUrl(page)}
             className={`px-3 py-2 rounded-lg text-sm font-medium cursor-pointer ${
@@ -55,19 +57,19 @@ export function Pagination({ currentPage, totalPages, baseUrl }: PaginationProps
             }`}
           >
             {page}
-          </a>
+          </Link>
         ) : (
           <span key={idx} className="px-2 py-2 text-slate-400">...</span>
         )
       ))}
 
       {currentPage < totalPages && (
-        <a
+        <Link
           href={getPageUrl(currentPage + 1)}
           className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
         >
           Siguiente →
-        </a>
+        </Link>
       )}
     </div>
   )

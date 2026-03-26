@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import Link from 'next/link'
-import { validateAndNormalizeSocialUrl } from '@/lib/utils/string-utils'
+import { validateAndNormalizeSocialUrl, removeAccents } from '@/lib/utils/string-utils'
 
 interface Sport {
   id: number
@@ -143,7 +143,7 @@ export default function RegisterPage() {
   }, [formData.region_id])
 
   const filteredSports = sports.filter(s => 
-    s.name.toLowerCase().includes(sportSearch.toLowerCase())
+    removeAccents(s.name.toLowerCase()).includes(removeAccents(sportSearch.toLowerCase()))
   )
 
   const handleSportToggle = (sportId: number) => {

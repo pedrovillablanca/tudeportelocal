@@ -7,6 +7,12 @@ export function generateSlug(text: string): string {
     .replace(/^-|-$/g, '')
 }
 
+export function removeAccents(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+}
+
 export function capitalizeWords(text: string): string {
   return text
     .toLowerCase()

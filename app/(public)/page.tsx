@@ -4,7 +4,7 @@ import { ClubCard } from '@/components/shared/ClubCard'
 import { SearchFilters } from '@/components/shared/SearchFilters'
 import { Pagination } from '@/components/shared/Pagination'
 import { Metadata } from 'next'
-import { generateSlug } from '@/lib/utils/string-utils'
+import { generateSlug, removeAccents } from '@/lib/utils/string-utils'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
@@ -121,7 +121,8 @@ export default async function HomePage({
       .eq('is_deleted', false)
 
     if (params.q) {
-      query = query.ilike('name', `%${params.q}%`)
+      const normalizedQuery = removeAccents(params.q)
+      query = query.or(`unaccent(name).ilike.*${normalizedQuery}*,name.ilike.*${params.q}*`)
     }
 
     if (regionId) {

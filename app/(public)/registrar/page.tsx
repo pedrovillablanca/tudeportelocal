@@ -557,6 +557,7 @@ export default function RegisterPage() {
               
               {errors.social && <p className="text-sm text-red-600">{errors.social}</p>}
               <p className="text-xs text-slate-500">El contacto con los clubes será a través de sus redes sociales.</p>
+              <p className="text-xs">⚠️ Ingresar mínimo 1 red social</p>
             </CardContent>
           </Card>
 
